@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('config-form');
     const outputUrlElement = document.getElementById('output-url');
     const copyButton = document.getElementById('copy-button');
+    const previewFrame = document.getElementById('preview-frame'); // Get the iframe
 
     let baseUrl = window.location.href.replace('config.html', '').replace(/\?.*/, '');
     if (!baseUrl.endsWith('/')) {
@@ -10,20 +11,42 @@ document.addEventListener('DOMContentLoaded', () => {
     baseUrl += 'index.html';
     // baseUrl = 'https://YOUR-USERNAME.github.io/YOUR-REPO/index.html'; // Manual override if needed
 
-    function generateUrl() {
+    // --- Debounce Function ---
+    // Prevents the iframe from reloading too rapidly on every tiny change.
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // --- Function to update ONLY the iframe ---
+    function updatePreview(url) {
+        console.log("Updating preview with:", url);
+        previewFrame.src = url;
+    }
+
+    // --- Create a debounced version of the updatePreview function ---
+    const debouncedUpdatePreview = debounce(updatePreview, 300); // 300ms delay
+
+    // --- Generate URL and Update Preview ---
+    function generateUrlAndUpdate() {
         const params = new URLSearchParams();
 
-        // Get values and remove '#' from colors
         const bgColor = document.getElementById('bgColor').value.substring(1);
         const textColor = document.getElementById('textColor').value.substring(1);
         const userColor = document.getElementById('userColor').value.substring(1);
         const fontSize = document.getElementById('fontSize').value;
         const fontFamily = document.getElementById('fontFamily').value;
         const hideAvatars = document.getElementById('hideAvatars').checked;
-        const width = document.getElementById('width').value; // New
-        const maxMessages = document.getElementById('maxMessages').value; // New
+        const width = document.getElementById('width').value;
+        const maxMessages = document.getElementById('maxMessages').value;
 
-        // Add parameters to the URL
         params.append('bgColor', bgColor);
         params.append('textColor', textColor);
         params.append('userColor', userColor);
@@ -32,13 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
            params.append('fontFamily', fontFamily);
         }
         params.append('hideAvatars', hideAvatars);
-        params.append('width', width); // New
-        params.append('maxMessages', maxMessages); // New
+        params.append('width', width);
+        params.append('maxMessages', maxMessages);
 
         const finalUrl = `${baseUrl}?${params.toString()}`;
+
+        // Update the text box immediately
         outputUrlElement.textContent = finalUrl;
+
+        // Update the iframe using the debounced function
+        debouncedUpdatePreview(finalUrl);
     }
 
+    // --- Copy URL Function (No change) ---
     function copyUrl() {
         const urlToCopy = outputUrlElement.textContent;
         navigator.clipboard.writeText(urlToCopy).then(() => {
@@ -52,8 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    form.addEventListener('input', generateUrl);
-    form.addEventListener('change', generateUrl);
+    // --- Event Listeners ---
+    form.addEventListener('input', generateUrlAndUpdate); // Use 'input' for more responsiveness
+    form.addEventListener('change', generateUrlAndUpdate); // Catch changes from checkboxes etc.
     copyButton.addEventListener('click', copyUrl);
-    generateUrl(); // Initial call
+
+    // --- Initial Call ---
+    generateUrlAndUpdate(); // Generate and load the initial preview
 });
