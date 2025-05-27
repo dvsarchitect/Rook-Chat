@@ -6,7 +6,6 @@
     --font-family: 'Arial', sans-serif;
     --message-padding: 10px;
     --border-radius: 5px;
-    --hide-avatars: block;
     --widget-width: 300px;
 }
 
@@ -27,11 +26,8 @@ body {
     right: auto;
     display: flex;
     flex-direction: column;
-    padding: 10px 10px 5px 10px;
+    padding: 10px; /* Simplified padding */
     box-sizing: border-box;
-    /* TEMPORARILY REMOVED MASK FOR DEBUGGING */
-    /* -webkit-mask-image: linear-gradient(to top, black 85%, transparent 100%); */
-    /* mask-image: linear-gradient(to top, black 85%, transparent 100%); */
     max-height: 100vh;
     overflow: hidden; /* Keep this to prevent scrollbars */
 }
@@ -43,27 +39,14 @@ body {
     border-radius: var(--border-radius);
     animation: slideIn 0.3s ease-out forwards;
     opacity: 1;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out, height 0.5s ease-out, padding 0.5s ease-out, margin 0.5s ease-out;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    height: auto;
     overflow: hidden;
 }
 
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-.chat-message.fading-out {
-    opacity: 0;
-    transform: translateY(-20px);
-    height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
-    border: none !important;
-    min-height: 0;
 }
 
 .chat-message .username {

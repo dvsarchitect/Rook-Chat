@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Config Page: DOMContentLoaded fired.");
     const form = document.getElementById('config-form');
     const outputUrlElement = document.getElementById('output-url');
     const copyButton = document.getElementById('copy-button');
@@ -7,44 +8,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const bgColorInput = document.getElementById('bgColor');
     const fontFamilySelect = document.getElementById('fontFamily');
 
-    const googleFonts = [
-        "Roboto", "Open Sans", "Lato", "Montserrat", "Oswald",
-        "Source Sans Pro", "Raleway", "Poppins", "Nunito", "Inter",
-        "Ubuntu", "Playfair Display", "Merriweather", "PT Sans"
-    ];
+    const googleFonts = [ "Roboto", "Open Sans", "Lato", "Montserrat", "Oswald", "Source Sans Pro", "Raleway", "Poppins", "Nunito", "Inter", "Ubuntu", "Playfair Display", "Merriweather", "PT Sans" ];
 
-    function populateFontDropdown() { /* ... (same as before) ... */ }
+    function populateFontDropdown() {
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "Arial, sans-serif";
+        defaultOption.textContent = "Default (Arial)";
+        fontFamilySelect.appendChild(defaultOption);
+        googleFonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font;
+            option.textContent = font;
+            fontFamilySelect.appendChild(option);
+        });
+        fontFamilySelect.value = "Roboto";
+        console.log("Config Page: Font dropdown populated.");
+    }
 
     if (!form || !outputUrlElement || !copyButton || !previewFrame || !transparentBgCheckbox || !bgColorInput || !fontFamilySelect) {
-        console.error("Config Page (config.js): One or more core HTML elements not found!");
+        console.error("Config Page: One or more core HTML elements not found!");
         return;
     }
 
     const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
-    // --- ADDED: The actual Debounce Function ---
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
+            const later = () => { clearTimeout(timeout); func(...args); };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     }
-    // --- End of Debounce Function ---
 
-    function performUpdate() { /* ... (same as before) ... */ }
-
-    const debouncedSetPreviewSrc = debounce((url) => {
-        previewFrame.src = url;
-    }, 350);
-
-    function updateImmediately() {
-         const params = new URLSearchParams();
-         // ... (Get all params ... ) ...
+    function buildUrl() {
+        const params = new URLSearchParams();
         const fontFamily = fontFamilySelect.value;
         const bgColor = document.getElementById('bgColor').value.substring(1);
         const textColor = document.getElementById('textColor').value.substring(1);
@@ -55,29 +53,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxMessages = document.getElementById('maxMessages').value;
         const hideUsers = document.getElementById('hideUsers').value;
         const transparentBg = transparentBgCheckbox.checked;
+
         params.append('bgColor', bgColor); params.append('textColor', textColor); params.append('userColor', userColor);
         params.append('fontSize', fontSize); if (fontFamily) { params.append('fontFamily', fontFamily); }
         params.append('hideAvatars', hideAvatars); params.append('width', width); params.append('maxMessages', maxMessages);
         if (hideUsers) { params.append('hideUsers', hideUsers); } params.append('transparentBg', transparentBg);
-
-         const finalUrl = `${baseUrl}?${params.toString()}`;
-         outputUrlElement.textContent = finalUrl;
-         debouncedSetPreviewSrc(finalUrl);
+        return `${baseUrl}?${params.toString()}`;
     }
 
-    function copyUrl() { /* ... (same as before) ... */ }
+    function updatePage(isInitial = false) {
+        const finalUrl = buildUrl();
+        outputUrlElement.textContent = finalUrl;
+        // Only set src if it's initial or debounced
+        if (isInitial) {
+             previewFrame.src = finalUrl;
+             console.log("Config Page: Setting IFRAME src (Initial).");
+        }
+    }
 
-    // --- Event Listeners ---
-    transparentBgCheckbox.addEventListener('change', () => {
+    const debouncedUpdatePreview = debounce(() => {
+        previewFrame.src = buildUrl();
+        console.log("Config Page: Setting IFRAME src (Debounced).");
+    }, 400); // Increased debounce slightly
+
+    function handleFormChange() {
         bgColorInput.disabled = transparentBgCheckbox.checked;
-        updateImmediately();
-    });
-    form.addEventListener('input', updateImmediately);
-    form.addEventListener('change', updateImmediately);
-    copyButton.addEventListener('click', copyUrl);
+        // Always update text box immediately
+        outputUrlElement.textContent = buildUrl();
+        // Call debounced version to update iframe
+        debouncedUpdatePreview();
+    }
 
-    // --- Initial Call ---
+    function copyUrl() { /* ... (copy function) ... */ }
+
     populateFontDropdown();
     bgColorInput.disabled = transparentBgCheckbox.checked;
-    performUpdate();
+    form.addEventListener('input', handleFormChange);
+    form.addEventListener('change', handleFormChange);
+    copyButton.addEventListener('click', copyUrl);
+    updatePage(true); // Initial call, ensuring iframe loads
+    console.log("Config Page: Initialized.");
 });

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("RookChat DBG: DOMContentLoaded fired."); // Log 1
+    console.log("RookChat DBG: DOMContentLoaded fired.");
     const chatContainer = document.getElementById('chat-container');
     const root = document.documentElement;
 
@@ -9,40 +9,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let maxMessages = 15;
-    const fadeOutDuration = 500;
     let hiddenUsernames = [];
 
-    function loadGoogleFont(fontName) { /* ... (same as before) ... */ }
-    function applyUrlParameters() { /* ... (same as before) ... */ }
+    function loadGoogleFont(fontName) {
+        try {
+            if (!fontName || fontName.includes(',')) { return; }
+            const fontUrlName = fontName.replace(/ /g, '+');
+            const fontUrl = `https://fonts.googleapis.com/css2?family=${fontUrlName}:wght@400;700&display=swap`;
+            if (document.querySelector(`link[href="${fontUrl}"]`)) { return; }
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = fontUrl;
+            document.head.appendChild(link);
+        } catch (e) { console.error("Error loading Google Font:", e); }
+    }
 
-    function removeOldMessagesSlice() {
-        const messages = Array.from(chatContainer.children);
-        const visibleMessages = messages.filter(msg => !msg.classList.contains('fading-out'));
-        const currentVisibleCount = visibleMessages.length;
-        let toRemoveCount = currentVisibleCount - maxMessages;
+    function applyUrlParameters() {
+        try {
+            console.log("RookChat DBG: Applying URL parameters.");
+            const params = new URLSearchParams(window.location.search);
+            const bgColor = params.get('bgColor');
+            const textColor = params.get('textColor');
+            const userColor = params.get('userColor');
+            const fontSize = params.get('fontSize');
+            const fontFamily = params.get('fontFamily');
+            const hideAvatars = params.get('hideAvatars'); // Still here even if img removed
+            const width = params.get('width');
+            const max = params.get('maxMessages');
+            const usersToHide = params.get('hideUsers');
+            const transparentBg = params.get('transparentBg');
 
-        console.log(`RookChat DBG: Checking messages. Visible=${currentVisibleCount}, Max=${maxMessages}, ToRemove=${toRemoveCount > 0 ? toRemoveCount : 0}`); // Log 2
+            if (transparentBg === 'true') { root.style.setProperty('--background-color', 'transparent'); }
+            else if (bgColor) { root.style.setProperty('--background-color', `#${bgColor}`); }
+            if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
+            if (userColor) root.style.setProperty('--username-color', `#${userColor}`);
+            if (fontSize) root.style.setProperty('--font-size', `${fontSize}px`);
+            // We don't have an img, but keep the var setting
+            root.style.setProperty('--hide-avatars', hideAvatars === 'true' ? 'none' : 'inline-block');
+            if (width) root.style.setProperty('--widget-width', `${width}px`);
+            
+            maxMessages = parseInt(max, 10);
+            if (isNaN(maxMessages) || maxMessages <= 0) { maxMessages = 15; }
 
-        if (toRemoveCount > 0) {
-            const messagesToFade = visibleMessages.slice(0, toRemoveCount);
-            console.log(`RookChat DBG: Fading out ${messagesToFade.length} messages.`); // Log 3
-            messagesToFade.forEach(message => {
-                message.classList.add('fading-out');
-                setTimeout(() => {
-                    if (message && message.parentNode === chatContainer) {
-                        chatContainer.removeChild(message);
-                    }
-                }, fadeOutDuration);
-            });
+            if (fontFamily) {
+                loadGoogleFont(fontFamily);
+                const cssFontFamily = fontFamily.includes(',') ? fontFamily : `'${fontFamily}', sans-serif`;
+                root.style.setProperty('--font-family', cssFontFamily);
+            }
+
+            if (usersToHide) {
+                hiddenUsernames = usersToHide.split(',').map(u => u.trim().toLowerCase()).filter(u => u);
+            }
+            console.log("RookChat DBG: Parameters applied. Max Messages:", maxMessages);
+        } catch (e) { console.error("Error applying URL parameters:", e); }
+    }
+
+    // --- SIMPLIFIED Immediate Removal Function ---
+    function removeOldMessages() {
+        while (chatContainer.children.length > maxMessages) {
+            const oldestMessage = chatContainer.firstChild;
+            if (oldestMessage) {
+                chatContainer.removeChild(oldestMessage);
+                console.log("RookChat DBG: Immediately removed a message.");
+            } else {
+                break; // Safety break
+            }
         }
     }
 
     function addChatMessage(username, message) {
-        console.log(`RookChat DBG: Attempting to add: ${username}`); // Log 4
-        if (hiddenUsernames.includes(username.toLowerCase())) {
-             console.log(`RookChat DBG: Hiding ${username}`); // Log 5
-            return;
-        }
+        console.log(`RookChat DBG: Attempting to add: ${username}`);
+        if (hiddenUsernames.includes(username.toLowerCase())) { return; }
 
         const messageElement = document.createElement('div');
         messageElement.classList.add('chat-message');
@@ -51,16 +88,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="message-text">${message}</span>
         `;
         chatContainer.appendChild(messageElement);
-        console.log(`RookChat DBG: Appended message from ${username}.`); // Log 6
-        removeOldMessagesSlice();
+        removeOldMessages(); // Call simplified version
         setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
     }
 
-    // --- Initial Setup ---
     applyUrlParameters();
-    console.log("RookChat DBG: Parameters applied. Setting up mock chat."); // Log 7
 
-    // --- Mock Chat ---
+    // Mock Chat
+    console.log("RookChat DBG: Setting up mock chat interval.");
     const demoUsers = ['StreamGazer', 'PixelPilot', 'bot_name', 'CodeWizard', 'GamerGeek', 'username1'];
     const demoMessages = ['Hello!', 'This looks great!', 'How do I change the color?', 'Pog!', 'LUL', 'Rook Chat Hype!'];
     setInterval(() => {
@@ -68,6 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const msg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
         addChatMessage(user, msg);
     }, 2500);
-    console.log("RookChat DBG: Mock chat interval set."); // Log 8
+    console.log("RookChat DBG: Mock chat interval set.");
 
-});
+}); // End of DOMContentLoaded
