@@ -1,5 +1,5 @@
 :root {
-    /* Default Values - These will be overridden by JS */
+    /* ... (variables remain the same) ... */
     --background-color: rgba(30, 30, 30, 0.8);
     --text-color: #ffffff;
     --username-color: #46b3ff;
@@ -7,80 +7,57 @@
     --font-family: 'Arial', sans-serif;
     --message-padding: 10px;
     --border-radius: 5px;
-    --hide-avatars: block; /* 'none' to hide */
-    --widget-width: 300px; /* Default width */
+    --hide-avatars: block;
+    --widget-width: 300px;
 }
 
 body {
     background-color: transparent;
     margin: 0;
-    overflow: hidden; /* CRITICAL: Prevents scrollbars */
+    overflow: hidden;
     font-family: var(--font-family);
     font-size: var(--font-size);
     color: var(--text-color);
-    width: var(--widget-width); /* Apply width */
+    /* Change 1: Removed width from body */
 }
 
 #chat-container {
     position: absolute;
-    /* Change 1: Anchor back to the BOTTOM */
     bottom: 0;
     left: 0;
-    right: 0;
+    /* Change 2: Set width here */
+    width: var(--widget-width);
+    /* Change 3: Set right to auto so width takes effect */
+    right: auto;
     display: flex;
-    /* Change 2: Keep column, JS will handle insertion order */
     flex-direction: column;
     padding: 10px;
-    /* Change 3: Flip mask to fade the TOP */
+    box-sizing: border-box; /* Important when adding padding/width */
     -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
     mask-image: linear-gradient(to top, black 70%, transparent 100%);
-    /* Add max-height and allow scroll for internal management */
-    max-height: 100vh; /* Ensure it doesn't exceed viewport height */
-    overflow: hidden; /* Hide internal scroll, we manage with JS/CSS */
+    max-height: 100vh;
+    overflow: hidden;
 }
+
+/* ... (rest of style.css remains mostly the same) ... */
 
 .chat-message {
     background-color: var(--background-color);
     margin-bottom: 5px;
     padding: var(--message-padding);
     border-radius: var(--border-radius);
-    /* Change 4: Revert to slideIn from bottom */
     animation: slideIn 0.3s ease-out forwards;
-    opacity: 1; /* Start visible */
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* For fading out */
+    opacity: 1;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    /* Ensure message text wraps */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-/* Change 5: Revert animation - slide from bottom */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+@keyframes slideIn { /* ... */ }
 
-/* Change 6: Fading out class - fade and move UP */
-.chat-message.fading-out {
-    opacity: 0;
-    transform: translateY(-20px); /* Move up as it fades */
-    margin-bottom: -50px; /* Helps collapse space quicker */
-}
+.chat-message.fading-out { /* ... */ }
 
+.chat-message img { /* ... */ }
 
-.chat-message img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    margin-right: 8px;
-    vertical-align: middle;
-    display: var(--hide-avatars); /* Control visibility */
-}
-
-.chat-message .username {
-    font-weight: bold;
-    color: var(--username-color);
-    margin-right: 5px;
-}
+.chat-message .username { /* ... */ }

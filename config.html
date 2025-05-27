@@ -5,51 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rook Chat Configuration</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; margin: 20px auto; /* Center and add margin */
-            max-width: 900px; /* Overall max width */
+        body { font-family: sans-serif; padding: 20px; margin: 20px auto;
+            /* Change 1: Reduced max-width for the whole page */
+            max-width: 800px;
         }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-        }
-        .controls {
-            flex: 1;
-            min-width: 300px; /* Reduced min width */
-            max-width: 400px;
-        }
-        .preview {
-            flex: 1;
-            min-width: 300px; /* Target width for preview */
-            border: 1px solid #ccc;
-            background-color: #333; /* Dark background to simulate OBS */
-            padding: 15px;
-            border-radius: 5px;
-        }
+        .container { display: flex; flex-wrap: wrap; gap: 30px; }
+        .controls { flex: 1; min-width: 300px; max-width: 400px; }
+        .preview { flex: 1; min-width: 300px; border: 1px solid #ccc;
+            background-color: #333; padding: 15px; border-radius: 5px; }
         .preview h2 { margin-top: 0; color: #fff; }
-        #preview-frame {
-            width: 100%;
-            height: 500px; /* Adjust height as needed */
-            border: 1px dashed #555;
-            background-color: #000; /* If iframe fails, show black */
-            box-sizing: border-box;
-        }
+        #preview-frame { width: 100%; height: 500px; border: 1px dashed #555;
+            background-color: #000; box-sizing: border-box; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="color"], input[type="number"], select, input[type="text"] {
+        input[type="color"], input[type="number"], select, input[type="text"], textarea { /* Added textarea */
             width: 100%; padding: 8px; box-sizing: border-box;
             border: 1px solid #ccc; border-radius: 4px;
         }
-        input[type="checkbox"] { margin-right: 5px; }
-        #output-url {
-            width: 100%; padding: 10px; margin-top: 20px; border: 1px solid #ddd;
+        textarea { min-height: 60px; }
+        input[type="checkbox"] { margin-right: 5px; width: auto; /* Adjust checkbox width */ }
+        #output-url { width: 100%; padding: 10px; margin-top: 20px; border: 1px solid #ddd;
             background-color: #f4f4f4; font-family: monospace; white-space: pre-wrap;
-            word-wrap: break-word; min-height: 50px; box-sizing: border-box;
-        }
-        button {
-            padding: 10px 15px; background-color: #007bff; color: white; border: none;
-            border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px;
-        }
+            word-wrap: break-word; min-height: 50px; box-sizing: border-box; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none;
+            border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #0056b3; }
         .warning, .info { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 20px;}
         .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
@@ -57,18 +36,14 @@
     </style>
 </head>
 <body>
-
     <h1>Rook Chat Configuration</h1>
     <p>Adjust the settings below, see the live preview update, and then copy the generated URL to use as a Browser Source in OBS.</p>
-
     <div class="container">
-
         <div class="controls">
             <h2>Settings</h2>
             <div class="info">
                 <strong>Tip:</strong> While you can set width here, you can also adjust the Width/Height directly in the OBS Browser Source properties for more precise scene fitting.
             </div>
-
             <form id="config-form">
                 <div class="form-group">
                     <label for="bgColor">Background Color:</label>
@@ -82,6 +57,40 @@
                     <label for="userColor">Username Color:</label>
                     <input type="color" id="userColor" value="#46B3FF">
                 </div>
-
+                 <div class="form-group">
+                    <label for="fontSize">Font Size (px):</label>
+                    <input type="number" id="fontSize" value="16" min="8" max="72">
+                </div>
+                 <div class="form-group">
+                    <label for="fontFamily">Font Family:</label>
+                    <input type="text" id="fontFamily" value="Arial, sans-serif" placeholder="e.g., 'Roboto', 'Verdana', sans-serif">
+                </div>
+                 <div class="form-group">
+                    <label for="width">Widget Width (px):</label>
+                    <input type="number" id="width" value="300" min="100" max="2000">
+                </div>
+                 <div class="form-group">
+                    <label for="maxMessages">Max Messages Displayed:</label>
+                    <input type="number" id="maxMessages" value="15" min="1" max="100">
+                </div>
                 <div class="form-group">
-                    <label for="fontSize">Font Size (px):
+                    <label for="hideUsers">Hidden Usernames (comma-separated):</label>
+                    <textarea id="hideUsers" placeholder="username1,AnotherUser,bot_name"></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="hideAvatars">
+                    <label for="hideAvatars" style="display: inline;">Hide Avatars</label>
+                </div>
+            </form>
+            <h2>Generated OBS Browser Source URL:</h2>
+            <div id="output-url"></div>
+            <button id="copy-button">Copy URL</button>
+        </div>
+        <div class="preview">
+            <h2>Live Preview</h2>
+            <iframe id="preview-frame" src="https://dvsarchitect.github.io/Rook-Chat/index.html?bgColor=1E1E1E&textColor=FFFFFF&userColor=46B3FF&fontSize=16&fontFamily=Arial%2C%20sans-serif&hideAvatars=false&width=300&maxMessages=15"></iframe>
+        </div>
+    </div>
+    <script src="config.js"></script>
+</body>
+</html>
