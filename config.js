@@ -13,19 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Ubuntu", "Playfair Display", "Merriweather", "PT Sans"
     ];
 
-    function populateFontDropdown() {
-        const defaultOption = document.createElement('option');
-        defaultOption.value = "Arial, sans-serif";
-        defaultOption.textContent = "Default (Arial)";
-        fontFamilySelect.appendChild(defaultOption);
-        googleFonts.forEach(font => {
-            const option = document.createElement('option');
-            option.value = font;
-            option.textContent = font;
-            fontFamilySelect.appendChild(option);
-        });
-        fontFamilySelect.value = "Roboto"; // Set default to Roboto
-    }
+    function populateFontDropdown() { /* ... (same as before) ... */ }
 
     if (!form || !outputUrlElement || !copyButton || !previewFrame || !transparentBgCheckbox || !bgColorInput || !fontFamilySelect) {
         console.error("Config Page (config.js): One or more core HTML elements not found!");
@@ -34,52 +22,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
-    function debounce(func, wait) { /* ... (debounce function) ... */ }
-
-    function performUpdate() {
-        const params = new URLSearchParams();
-        const fontFamily = fontFamilySelect.value;
-        // ... (getting other params) ...
-        const bgColor = document.getElementById('bgColor').value.substring(1);
-        const textColor = document.getElementById('textColor').value.substring(1);
-        const userColor = document.getElementById('userColor').value.substring(1);
-        const fontSize = document.getElementById('fontSize').value;
-        const hideAvatars = document.getElementById('hideAvatars').checked;
-        const width = document.getElementById('width').value;
-        const maxMessages = document.getElementById('maxMessages').value;
-        const hideUsers = document.getElementById('hideUsers').value;
-        const transparentBg = transparentBgCheckbox.checked;
-
-        // ... (appending params) ...
-        params.append('bgColor', bgColor);
-        params.append('textColor', textColor);
-        params.append('userColor', userColor);
-        params.append('fontSize', fontSize);
-        if (fontFamily) { params.append('fontFamily', fontFamily); }
-        params.append('hideAvatars', hideAvatars);
-        params.append('width', width);
-        params.append('maxMessages', maxMessages);
-        if (hideUsers) { params.append('hideUsers', hideUsers); }
-        params.append('transparentBg', transparentBg);
-
-
-        const finalUrl = `${baseUrl}?${params.toString()}`;
-        outputUrlElement.textContent = finalUrl;
-        previewFrame.src = finalUrl; // Set src directly
-        console.log("Config Page (config.js): Setting iframe src.");
+    // --- ADDED: The actual Debounce Function ---
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
+    // --- End of Debounce Function ---
 
-    // CHANGE: The debounced version now *only* sets the src.
-    // We still call performUpdate() but only the iframe part is delayed.
+    function performUpdate() { /* ... (same as before) ... */ }
+
     const debouncedSetPreviewSrc = debounce((url) => {
-        console.log("Config Page (config.js): Debounced - Setting iframe src.");
         previewFrame.src = url;
     }, 350);
 
-    // CHANGE: A version that updates immediately *except* for the iframe
     function updateImmediately() {
          const params = new URLSearchParams();
-         // ... (Get all params again - slightly redundant but safer) ...
+         // ... (Get all params ... ) ...
         const fontFamily = fontFamilySelect.value;
         const bgColor = document.getElementById('bgColor').value.substring(1);
         const textColor = document.getElementById('textColor').value.substring(1);
@@ -94,19 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
         params.append('fontSize', fontSize); if (fontFamily) { params.append('fontFamily', fontFamily); }
         params.append('hideAvatars', hideAvatars); params.append('width', width); params.append('maxMessages', maxMessages);
         if (hideUsers) { params.append('hideUsers', hideUsers); } params.append('transparentBg', transparentBg);
-         
+
          const finalUrl = `${baseUrl}?${params.toString()}`;
-         outputUrlElement.textContent = finalUrl; // Update text box now
-         debouncedSetPreviewSrc(finalUrl); // Update preview later
+         outputUrlElement.textContent = finalUrl;
+         debouncedSetPreviewSrc(finalUrl);
     }
 
-
-    function copyUrl() { /* ... (copy function) ... */ }
+    function copyUrl() { /* ... (same as before) ... */ }
 
     // --- Event Listeners ---
     transparentBgCheckbox.addEventListener('change', () => {
         bgColorInput.disabled = transparentBgCheckbox.checked;
-        updateImmediately(); // Call the immediate/debounced version
+        updateImmediately();
     });
     form.addEventListener('input', updateImmediately);
     form.addEventListener('change', updateImmediately);
@@ -115,5 +79,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Call ---
     populateFontDropdown();
     bgColorInput.disabled = transparentBgCheckbox.checked;
-    performUpdate(); // Call the FULL update ONCE to load the initial preview without delay
+    performUpdate();
 });
