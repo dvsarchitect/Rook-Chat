@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
     const root = document.documentElement;
 
-    // Check if chatContainer exists early - helps debug
     if (!chatContainer || !root) {
         console.error("Rook Chat (script.js): Could not find #chat-container or :root!");
-        return; // Stop if core elements are missing
+        return;
     }
 
     let maxMessages = 15;
+    const fadeOutDuration = 500; // Use 500ms for the fade
     let hiddenUsernames = [];
 
     function applyUrlParameters() {
@@ -23,11 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const max = params.get('maxMessages');
         const usersToHide = params.get('hideUsers');
 
-        // FIX: Use backticks (`) for template literals
         if (bgColor) root.style.setProperty('--background-color', `#${bgColor}`);
         if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
         if (userColor) root.style.setProperty('--username-color', `#${userColor}`);
-
         if (fontSize) root.style.setProperty('--font-size', `${fontSize}px`);
         if (fontFamily) root.style.setProperty('--font-family', fontFamily);
         if (hideAvatars === 'true') {
@@ -48,19 +46,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 .map(user => user.trim().toLowerCase())
                 .filter(user => user.length > 0);
         }
-        console.log("Widget (script.js) - Max Messages:", maxMessages);
     }
 
-    // --- SIMPLIFIED Removal Function (No Fade) ---
+    // --- Re-implement Fading Removal Function ---
     function removeOldMessages() {
-        while (chatContainer.children.length > maxMessages) {
-            const oldestMessage = chatContainer.firstChild;
-            if (oldestMessage) {
-                chatContainer.removeChild(oldestMessage);
-                console.log("Widget (script.js): Immediately removed a message.");
-            } else {
-                break; // Safety break
-            }
+        const messages = Array.from(chatContainer.children);
+        const visibleMessages = messages.filter(msg => !msg.classList.contains('fading-out'));
+        const currentVisibleCount = visibleMessages.length;
+        let toRemoveCount = currentVisibleCount - maxMessages;
+
+        if (toRemoveCount > 0) {
+            const messagesToFade = visibleMessages.slice(0, toRemoveCount);
+            messagesToFade.forEach(message => {
+                message.classList.add('fading-out'); // Add class to trigger CSS transition
+                // Set timeout to remove from DOM *after* transition finishes
+                setTimeout(() => {
+                    if (message && message.parentNode === chatContainer) {
+                        chatContainer.removeChild(message);
+                    }
+                }, fadeOutDuration);
+            });
         }
     }
 
@@ -77,13 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="message-text">${message}</span>
         `;
         chatContainer.appendChild(messageElement);
-        removeOldMessages(); // Call simplified version
+        removeOldMessages(); // Call fading version
         setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
     }
 
     applyUrlParameters();
 
-    // Mock Chat
+    // Mock Chat (still running, but won't log like crazy)
     let demoCounter = 0;
     const demoUsers = ['StreamGazer', 'PixelPilot', 'bot_name', 'CodeWizard', 'GamerGeek', 'username1'];
     const demoMessages = ['Hello!', 'This is awesome!', 'How do I change the color?', 'Pog!', 'LUL'];
