@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rook Chat Configuration</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; margin: auto; }
+        body { font-family: sans-serif; padding: 20px; margin: 20px auto; /* Center and add margin */
+            max-width: 900px; /* Overall max width */
+        }
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -13,12 +15,12 @@
         }
         .controls {
             flex: 1;
-            min-width: 350px;
-            max-width: 500px;
+            min-width: 300px; /* Reduced min width */
+            max-width: 400px;
         }
         .preview {
             flex: 1;
-            min-width: 350px;
+            min-width: 300px; /* Target width for preview */
             border: 1px solid #ccc;
             background-color: #333; /* Dark background to simulate OBS */
             padding: 15px;
@@ -52,7 +54,6 @@
         .warning, .info { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 20px;}
         .info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
         h1, h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 15px; }
-
     </style>
 </head>
 <body>
@@ -64,10 +65,7 @@
 
         <div class="controls">
             <h2>Settings</h2>
-            <div class="warning">
-                <strong>Important:</strong> You must host these files on GitHub Pages first. The generated URL assumes you are hosting from the root of your GitHub Pages site.
-            </div>
-             <div class="info">
+            <div class="info">
                 <strong>Tip:</strong> While you can set width here, you can also adjust the Width/Height directly in the OBS Browser Source properties for more precise scene fitting.
             </div>
 
@@ -86,39 +84,4 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="fontSize">Font Size (px):</label>
-                    <input type="number" id="fontSize" value="16" min="8" max="72">
-                </div>
-                 <div class="form-group">
-                    <label for="fontFamily">Font Family:</label>
-                    <input type="text" id="fontFamily" value="Arial, sans-serif" placeholder="e.g., 'Roboto', 'Verdana', sans-serif">
-                </div>
-
-                <div class="form-group">
-                    <label for="width">Widget Width (px):</label>
-                    <input type="number" id="width" value="300" min="100" max="2000">
-                </div>
-                 <div class="form-group">
-                    <label for="maxMessages">Max Messages Displayed:</label>
-                    <input type="number" id="maxMessages" value="15" min="1" max="100">
-                </div>
-
-                <div class="form-group">
-                    <input type="checkbox" id="hideAvatars">
-                    <label for="hideAvatars" style="display: inline;">Hide Avatars</label>
-                </div>
-            </form>
-
-            <h2>Generated OBS Browser Source URL:</h2>
-            <div id="output-url"></div>
-            <button id="copy-button">Copy URL</button>
-        </div>
-
-        <div class="preview">
-            <h2>Live Preview</h2>
-            <iframe id="preview-frame" src=""></iframe>
-        </div>
-
-    </div> <script src="config.js"></script>
-</body>
-</html>
+                    <label for="fontSize">Font Size (px):

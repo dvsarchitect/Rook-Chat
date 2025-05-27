@@ -4,15 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyButton = document.getElementById('copy-button');
     const previewFrame = document.getElementById('preview-frame'); // Get the iframe
 
-    let baseUrl = window.location.href.replace('config.html', '').replace(/\?.*/, '');
-    if (!baseUrl.endsWith('/')) {
-        baseUrl += '/';
-    }
-    baseUrl += 'index.html';
-    // baseUrl = 'https://YOUR-USERNAME.github.io/YOUR-REPO/index.html'; // Manual override if needed
+    // --- Set the Base URL explicitly ---
+    const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
     // --- Debounce Function ---
-    // Prevents the iframe from reloading too rapidly on every tiny change.
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -82,10 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners ---
-    form.addEventListener('input', generateUrlAndUpdate); // Use 'input' for more responsiveness
-    form.addEventListener('change', generateUrlAndUpdate); // Catch changes from checkboxes etc.
+    form.addEventListener('input', generateUrlAndUpdate);
+    form.addEventListener('change', generateUrlAndUpdate);
     copyButton.addEventListener('click', copyUrl);
 
     // --- Initial Call ---
-    generateUrlAndUpdate(); // Generate and load the initial preview
+    // We don't need to call generateUrlAndUpdate() anymore because the
+    // iframe now has a valid initial src attribute set in the HTML.
+    // However, we DO need to populate the output URL box initially.
+    generateUrlAndUpdate();
 });
