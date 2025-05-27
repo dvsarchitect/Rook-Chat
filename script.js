@@ -1,114 +1,80 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('chat-container');
-    const root = document.documentElement;
+    const form = document.getElementById('config-form');
+    const outputUrlElement = document.getElementById('output-url');
+    const copyButton = document.getElementById('copy-button');
+    const previewFrame = document.getElementById('preview-frame');
 
-    let maxMessages = 15; // Default value
-    const fadeOutDuration = 500; // Match CSS transition duration in ms
-    let hiddenUsernames = [];
+    const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
-    // --- 1. Apply URL Parameters ---
-    function applyUrlParameters() {
-        const params = new URLSearchParams(window.location.search);
-
-        const bgColor = params.get('bgColor');
-        const textColor = params.get('textColor');
-        const userColor = params.get('userColor');
-        const fontSize = params.get('fontSize');
-        const fontFamily = params.get('fontFamily');
-        const hideAvatars = params.get('hideAvatars');
-        const width = params.get('width');
-        const max = params.get('maxMessages');
-        const usersToHide = params.get('hideUsers');
-
-        // FIX 1: Correctly use template literals (`) to include the '#' inside the string
-        if (bgColor) root.style.setProperty('--background-color', `#${bgColor}`);
-        if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
-        if (userColor) root.style.setProperty('--username-color', `#${userColor}`);
-
-        if (fontSize) root.style.setProperty('--font-size', `${fontSize}px`);
-        if (fontFamily) root.style.setProperty('--font-family', fontFamily);
-        if (hideAvatars === 'true') {
-            root.style.setProperty('--hide-avatars', 'none');
-        } else {
-            root.style.setProperty('--hide-avatars', 'inline-block');
-        }
-        if (width) root.style.setProperty('--widget-width', `${width}px`);
-        if (max) maxMessages = parseInt(max, 10); // Ensure it's a number
-
-        if (usersToHide) {
-            hiddenUsernames = usersToHide
-                .split(',')
-                .map(user => user.trim().toLowerCase())
-                .filter(user => user.length > 0);
-        }
-
-        console.log("Applied Settings:", { width, maxMessages, hiddenUsernames });
+    // --- Debounce Function ---
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
-    // --- 2. Handle Chat Messages ---
-    function addChatMessage(username, message, avatarUrl = 'https://via.placeholder.com/24') {
-        if (hiddenUsernames.includes(username.toLowerCase())) {
-            return; // Skip hidden users
-        }
+    // --- Original Function to Generate URL and Update ---
+    function performUpdate() {
+        const params = new URLSearchParams();
 
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('chat-message');
+        const bgColor = document.getElementById('bgColor').value.substring(1);
+        const textColor = document.getElementById('textColor').value.substring(1);
+        const userColor = document.getElementById('userColor').value.substring(1);
+        const fontSize = document.getElementById('fontSize').value;
+        const fontFamily = document.getElementById('fontFamily').value;
+        const hideAvatars = document.getElementById('hideAvatars').checked;
+        const width = document.getElementById('width').value;
+        const maxMessages = document.getElementById('maxMessages').value;
+        const hideUsers = document.getElementById('hideUsers').value;
 
-        // Ensure text is properly escaped/displayed (though innerHTML is usually fine here)
-        messageElement.innerHTML = `
-            <img src="${avatarUrl}" alt="Avatar">
-            <span class="username">${username}:</span>
-            <span class="message-text">${message}</span>
-        `;
+        params.append('bgColor', bgColor);
+        params.append('textColor', textColor);
+        params.append('userColor', userColor);
+        params.append('fontSize', fontSize);
+        if (fontFamily) { params.append('fontFamily', fontFamily); }
+        params.append('hideAvatars', hideAvatars);
+        params.append('width', width);
+        params.append('maxMessages', maxMessages);
+        if (hideUsers) { params.append('hideUsers', hideUsers); }
 
-        chatContainer.appendChild(messageElement);
+        const finalUrl = `${baseUrl}?${params.toString()}`;
 
-        // FIX 2: More robustly check and remove messages
-        removeOldMessages();
-        
-        // Ensure it auto-scrolls to the bottom
-        setTimeout(() => {
-             chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 50);
+        // Update both the text box and the iframe
+        outputUrlElement.textContent = finalUrl;
+        previewFrame.src = finalUrl;
+        console.log("Updating URL and Preview:", finalUrl);
     }
 
-    // FIX 3: Dedicated function for removing old messages
-    function removeOldMessages() {
-         while (chatContainer.children.length > maxMessages) {
-            const oldestMessage = chatContainer.firstChild;
-            if (oldestMessage && !oldestMessage.classList.contains('fading-out')) {
-                oldestMessage.classList.add('fading-out');
-                // Use 'transitionend' for smoother removal, or stick with setTimeout
-                setTimeout(() => {
-                    // Double-check it still exists and is a child before removing
-                    if (oldestMessage && oldestMessage.parentNode === chatContainer) {
-                       chatContainer.removeChild(oldestMessage);
-                    }
-                }, fadeOutDuration);
-            } else if (oldestMessage) {
-                // If it's somehow stuck in fading, or no message, just remove/break
-                if (oldestMessage.parentNode === chatContainer) {
-                   chatContainer.removeChild(oldestMessage);
-                } else {
-                   break; // Break if something is wrong (e.g., no firstChild)
-                }
-            } else {
-                break; // No more children
-            }
-        }
+    // --- Create a debounced version of the ENTIRE update function ---
+    const debouncedPerformUpdate = debounce(performUpdate, 350); // Use a ~350ms delay
+
+    // --- Copy URL Function ---
+    function copyUrl() {
+        const urlToCopy = outputUrlElement.textContent;
+        navigator.clipboard.writeText(urlToCopy).then(() => {
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy URL';
+            }, 1500);
+        }).catch(err => {
+            console.error('Failed to copy URL: ', err);
+            alert('Failed to copy URL. Please copy it manually.');
+        });
     }
 
+    // --- Event Listeners ---
+    // Make BOTH event listeners call the DEBOUNCED version
+    form.addEventListener('input', debouncedPerformUpdate);
+    form.addEventListener('change', debouncedPerformUpdate);
+    copyButton.addEventListener('click', copyUrl);
 
-    // --- 3. Run Everything ---
-    applyUrlParameters();
-
-    // --- 4. Mock Chat ---
-    let demoCounter = 0;
-    const demoUsers = ['StreamGazer', 'PixelPilot', 'bot_name', 'CodeWizard', 'GamerGeek', 'username1'];
-    const demoMessages = ['Hello!', 'This is awesome!', 'How do I change the color?', 'Pog!', 'LUL'];
-    setInterval(() => {
-        const user = demoUsers[Math.floor(Math.random() * demoUsers.length)];
-        const msg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
-        addChatMessage(user, `${msg} (${demoCounter++})`);
-    }, 2500);
+    // --- Initial Call ---
+    // Call the original function directly ONCE on load to set initial state
+    performUpdate();
 });
