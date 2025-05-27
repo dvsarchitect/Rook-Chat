@@ -2,13 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
     const root = document.documentElement;
 
+    // Check if chatContainer exists early - helps debug
+    if (!chatContainer || !root) {
+        console.error("Rook Chat (script.js): Could not find #chat-container or :root!");
+        return; // Stop if core elements are missing
+    }
+
     let maxMessages = 15;
-    const fadeOutDuration = 500;
     let hiddenUsernames = [];
 
     function applyUrlParameters() {
         const params = new URLSearchParams(window.location.search);
-        // ... (getting params remains the same) ...
         const bgColor = params.get('bgColor');
         const textColor = params.get('textColor');
         const userColor = params.get('userColor');
@@ -19,25 +23,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const max = params.get('maxMessages');
         const usersToHide = params.get('hideUsers');
 
-        // ... (setting CSS vars remains the same) ...
+        // FIX: Use backticks (`) for template literals
         if (bgColor) root.style.setProperty('--background-color', `#${bgColor}`);
         if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
         if (userColor) root.style.setProperty('--username-color', `#${userColor}`);
+
         if (fontSize) root.style.setProperty('--font-size', `${fontSize}px`);
         if (fontFamily) root.style.setProperty('--font-family', fontFamily);
-        if (hideAvatars === 'true') { /* ... */ }
+        if (hideAvatars === 'true') {
+            root.style.setProperty('--hide-avatars', 'none');
+        } else {
+            root.style.setProperty('--hide-avatars', 'inline-block');
+        }
         if (width) root.style.setProperty('--widget-width', `${width}px`);
         
-        // Ensure maxMessages is set correctly
         maxMessages = parseInt(max, 10);
         if (isNaN(maxMessages) || maxMessages <= 0) {
-            maxMessages = 15; // Fallback to a reasonable default
+            maxMessages = 15;
         }
 
+        if (usersToHide) {
+            hiddenUsernames = usersToHide
+                .split(',')
+                .map(user => user.trim().toLowerCase())
+                .filter(user => user.length > 0);
+        }
+        console.log("Widget (script.js) - Max Messages:", maxMessages);
+    }
 
-        if (usersToHide) { /* ... */ }
-
-        console.log("Applying Settings - Max Messages:", maxMessages);
+    // --- SIMPLIFIED Removal Function (No Fade) ---
+    function removeOldMessages() {
+        while (chatContainer.children.length > maxMessages) {
+            const oldestMessage = chatContainer.firstChild;
+            if (oldestMessage) {
+                chatContainer.removeChild(oldestMessage);
+                console.log("Widget (script.js): Immediately removed a message.");
+            } else {
+                break; // Safety break
+            }
+        }
     }
 
     function addChatMessage(username, message, avatarUrl = 'https://via.placeholder.com/24') {
@@ -53,40 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="message-text">${message}</span>
         `;
         chatContainer.appendChild(messageElement);
-        removeOldMessages();
+        removeOldMessages(); // Call simplified version
         setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
-    }
-
-    // --- NEWER and HOPEFULLY Better Removal Function ---
-    function removeOldMessages() {
-        const messages = Array.from(chatContainer.children);
-        // We only want to count messages that *aren't* already fading out
-        const visibleMessages = messages.filter(msg => !msg.classList.contains('fading-out'));
-        const currentVisibleCount = visibleMessages.length;
-        
-        console.log(`Checking messages. Visible: ${currentVisibleCount}, Max: ${maxMessages}`);
-
-        // Calculate how many messages to remove
-        let toRemoveCount = currentVisibleCount - maxMessages;
-
-        if (toRemoveCount > 0) {
-            console.log(`Need to remove ${toRemoveCount} message(s).`);
-            // Find the oldest *visible* messages
-            const messagesToFade = visibleMessages.slice(0, toRemoveCount);
-
-            messagesToFade.forEach(message => {
-                console.log("Fading out a message.");
-                message.classList.add('fading-out');
-
-                // Set a timeout to remove it after the CSS transition
-                setTimeout(() => {
-                    if (message && message.parentNode === chatContainer) {
-                        chatContainer.removeChild(message);
-                        console.log("Removed a message via timeout.");
-                    }
-                }, fadeOutDuration);
-            });
-        }
     }
 
     applyUrlParameters();
@@ -100,4 +92,5 @@ document.addEventListener('DOMContentLoaded', () => {
         const msg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
         addChatMessage(user, `${msg} (${demoCounter++})`);
     }, 2500);
-});
+
+}); // End of DOMContentLoaded
