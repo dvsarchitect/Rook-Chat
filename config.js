@@ -6,16 +6,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
-    function debounce(func, wait) { /* ... (debounce function remains the same) ... */
+    function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
-            const later = () => { clearTimeout(timeout); func(...args); };
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     }
 
-    function updatePreview(url) { previewFrame.src = url; }
+    function updatePreview(url) {
+        console.log("Updating preview with:", url);
+        previewFrame.src = url;
+    }
+
     const debouncedUpdatePreview = debounce(updatePreview, 300);
 
     function generateUrlAndUpdate() {
@@ -29,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hideAvatars = document.getElementById('hideAvatars').checked;
         const width = document.getElementById('width').value;
         const maxMessages = document.getElementById('maxMessages').value;
-        const hideUsers = document.getElementById('hideUsers').value; // Get hidden users
+        const hideUsers = document.getElementById('hideUsers').value;
 
         params.append('bgColor', bgColor);
         params.append('textColor', textColor);
@@ -39,19 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
         params.append('hideAvatars', hideAvatars);
         params.append('width', width);
         params.append('maxMessages', maxMessages);
-        if (hideUsers) { params.append('hideUsers', hideUsers); } // Add if present
+        if (hideUsers) { params.append('hideUsers', hideUsers); }
 
         const finalUrl = `${baseUrl}?${params.toString()}`;
         outputUrlElement.textContent = finalUrl;
         debouncedUpdatePreview(finalUrl);
     }
 
-    function copyUrl() { /* ... (copy function remains the same) ... */
+    function copyUrl() {
         const urlToCopy = outputUrlElement.textContent;
         navigator.clipboard.writeText(urlToCopy).then(() => {
             copyButton.textContent = 'Copied!';
-            setTimeout(() => { copyButton.textContent = 'Copy URL'; }, 1500);
-        }).catch(err => { alert('Failed to copy URL.'); });
+            setTimeout(() => {
+                copyButton.textContent = 'Copy URL';
+            }, 1500);
+        }).catch(err => {
+            console.error('Failed to copy URL: ', err);
+            alert('Failed to copy URL. Please copy it manually.');
+        });
     }
 
     form.addEventListener('input', generateUrlAndUpdate);
