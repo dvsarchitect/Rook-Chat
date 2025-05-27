@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rook Chat Configuration</title>
     <style>
-        /* ... (CSS remains the same) ... */
-         body { font-family: sans-serif; padding: 20px; margin: 20px auto; max-width: 800px; }
+        /* ... (CSS remains largely the same) ... */
+        body { font-family: sans-serif; padding: 20px; margin: 20px auto; max-width: 800px; }
         .container { display: flex; flex-wrap: wrap; gap: 30px; }
         .controls { flex: 1; min-width: 300px; max-width: 400px; }
         .preview { flex: 1; min-width: 300px; border: 1px solid #ccc; background-color: #333; padding: 15px; border-radius: 5px; }
@@ -17,7 +17,7 @@
         input[type="color"], input[type="number"], select, input[type="text"], textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         textarea { min-height: 60px; }
         input[type="checkbox"] { margin-right: 5px; width: auto; }
-        input:disabled { background-color: #eee; cursor: not-allowed; } /* Style for disabled input */
+        input:disabled { background-color: #eee; cursor: not-allowed; }
         #output-url { width: 100%; padding: 10px; margin-top: 20px; border: 1px solid #ddd; background-color: #f4f4f4; font-family: monospace; white-space: pre-wrap; word-wrap: break-word; min-height: 50px; box-sizing: border-box; }
         button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #0056b3; }
@@ -35,46 +35,19 @@
                 <strong>Tip:</strong> While you can set width here, you can also adjust the Width/Height directly in the OBS Browser Source properties for more precise scene fitting.
             </div>
             <form id="config-form">
+                <div class="form-group"> <label for="bgColor">Background Color:</label> <input type="color" id="bgColor" value="#1E1E1E"> </div>
+                <div class="form-group"> <input type="checkbox" id="transparentBg"> <label for="transparentBg" style="display: inline;">Use Transparent Background</label> </div>
+                <div class="form-group"> <label for="textColor">Text Color:</label> <input type="color" id="textColor" value="#FFFFFF"> </div>
+                <div class="form-group"> <label for="userColor">Username Color:</label> <input type="color" id="userColor" value="#46B3FF"> </div>
+                <div class="form-group"> <label for="fontSize">Font Size (px):</label> <input type="number" id="fontSize" value="16" min="8" max="72"> </div>
                 <div class="form-group">
-                    <label for="bgColor">Background Color:</label>
-                    <input type="color" id="bgColor" value="#1E1E1E">
-                </div>
-                <div class="form-group">
-                    <input type="checkbox" id="transparentBg">
-                    <label for="transparentBg" style="display: inline;">Use Transparent Background</label>
-                </div>
-                <div class="form-group">
-                    <label for="textColor">Text Color:</label>
-                    <input type="color" id="textColor" value="#FFFFFF">
-                </div>
-                <div class="form-group">
-                    <label for="userColor">Username Color:</label>
-                    <input type="color" id="userColor" value="#46B3FF">
-                </div>
-                 <div class="form-group">
-                    <label for="fontSize">Font Size (px):</label>
-                    <input type="number" id="fontSize" value="16" min="8" max="72">
-                </div>
-                 <div class="form-group">
                     <label for="fontFamily">Font Family:</label>
-                    <input type="text" id="fontFamily" value="Arial, sans-serif" placeholder="e.g., 'Roboto', 'Verdana', sans-serif">
+                    <select id="fontFamily"></select>
                 </div>
-                 <div class="form-group">
-                    <label for="width">Widget Width (px):</label>
-                    <input type="number" id="width" value="300" min="100" max="2000">
-                </div>
-                 <div class="form-group">
-                    <label for="maxMessages">Max Messages Displayed:</label>
-                    <input type="number" id="maxMessages" value="15" min="1" max="100">
-                </div>
-                 <div class="form-group">
-                    <label for="hideUsers">Hidden Usernames (comma-separated):</label>
-                    <textarea id="hideUsers" placeholder="username1,AnotherUser,bot_name"></textarea>
-                </div>
-                <div class="form-group">
-                    <input type="checkbox" id="hideAvatars">
-                    <label for="hideAvatars" style="display: inline;">Hide Avatars</label>
-                </div>
+                 <div class="form-group"> <label for="width">Widget Width (px):</label> <input type="number" id="width" value="300" min="100" max="2000"> </div>
+                 <div class="form-group"> <label for="maxMessages">Max Messages Displayed:</label> <input type="number" id="maxMessages" value="15" min="1" max="100"> </div>
+                 <div class="form-group"> <label for="hideUsers">Hidden Usernames (comma-separated):</label> <textarea id="hideUsers" placeholder="username1,AnotherUser,bot_name"></textarea> </div>
+                 <div class="form-group"> <input type="checkbox" id="hideAvatars"> <label for="hideAvatars" style="display: inline;">Hide Avatars</label> </div>
             </form>
             <h2>Generated OBS Browser Source URL:</h2>
             <div id="output-url"></div>
@@ -82,7 +55,7 @@
         </div>
         <div class="preview">
             <h2>Live Preview</h2>
-            <iframe id="preview-frame" src="https://dvsarchitect.github.io/Rook-Chat/index.html?bgColor=1E1E1E&textColor=FFFFFF&userColor=46B3FF&fontSize=16&fontFamily=Arial%2C%20sans-serif&hideAvatars=false&width=300&maxMessages=15"></iframe>
+            <iframe id="preview-frame" src="https://dvsarchitect.github.io/Rook-Chat/index.html?bgColor=1E1E1E&textColor=FFFFFF&userColor=46B3FF&fontSize=16&fontFamily=Roboto&hideAvatars=false&width=300&maxMessages=15&transparentBg=false"></iframe>
         </div>
     </div>
     <script src="config.js"></script>

@@ -3,11 +3,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const outputUrlElement = document.getElementById('output-url');
     const copyButton = document.getElementById('copy-button');
     const previewFrame = document.getElementById('preview-frame');
-    // Get new elements
     const transparentBgCheckbox = document.getElementById('transparentBg');
     const bgColorInput = document.getElementById('bgColor');
+    const fontFamilySelect = document.getElementById('fontFamily'); // Get the new select element
 
-    if (!form || !outputUrlElement || !copyButton || !previewFrame || !transparentBgCheckbox || !bgColorInput) {
+    // Define the Google Fonts we want to offer
+    const googleFonts = [
+        "Roboto", "Open Sans", "Lato", "Montserrat", "Oswald",
+        "Source Sans Pro", "Raleway", "Poppins", "Nunito", "Inter",
+        "Ubuntu", "Playfair Display", "Merriweather", "PT Sans"
+    ];
+
+    // --- Function to populate the font dropdown ---
+    function populateFontDropdown() {
+        // Add a default/system font option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "Arial, sans-serif"; // A safe default
+        defaultOption.textContent = "Default (Arial)";
+        fontFamilySelect.appendChild(defaultOption);
+
+        // Add Google Fonts
+        googleFonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font; // Use the font name as the value
+            option.textContent = font;
+            fontFamilySelect.appendChild(option);
+        });
+        
+        // Set initial value (optional, or let it be default)
+        fontFamilySelect.value = "Roboto"; 
+    }
+
+    if (!form || !outputUrlElement || !copyButton || !previewFrame || !transparentBgCheckbox || !bgColorInput || !fontFamilySelect) {
         console.error("Config Page (config.js): One or more core HTML elements not found!");
         alert("Error: Configuration page elements not found. Please check HTML and IDs.");
         return;
@@ -15,38 +42,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseUrl = 'https://dvsarchitect.github.io/Rook-Chat/index.html';
 
-    function debounce(func, wait) { /* ... (debounce function) ... */
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => { clearTimeout(timeout); func(...args); };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
+    function debounce(func, wait) { /* ... (debounce function) ... */ }
 
     function performUpdate() {
         const params = new URLSearchParams();
+        // ... (getting other params remains the same) ...
+        const fontFamily = fontFamilySelect.value; // Get value from select
         const bgColor = document.getElementById('bgColor').value.substring(1);
         const textColor = document.getElementById('textColor').value.substring(1);
         const userColor = document.getElementById('userColor').value.substring(1);
         const fontSize = document.getElementById('fontSize').value;
-        const fontFamily = document.getElementById('fontFamily').value;
         const hideAvatars = document.getElementById('hideAvatars').checked;
         const width = document.getElementById('width').value;
         const maxMessages = document.getElementById('maxMessages').value;
         const hideUsers = document.getElementById('hideUsers').value;
-        const transparentBg = transparentBgCheckbox.checked; // Get checkbox value
+        const transparentBg = transparentBgCheckbox.checked;
 
         params.append('bgColor', bgColor);
         params.append('textColor', textColor);
         params.append('userColor', userColor);
         params.append('fontSize', fontSize);
+        // Add the selected font name to the URL
         if (fontFamily) { params.append('fontFamily', fontFamily); }
         params.append('hideAvatars', hideAvatars);
         params.append('width', width);
         params.append('maxMessages', maxMessages);
         if (hideUsers) { params.append('hideUsers', hideUsers); }
-        params.append('transparentBg', transparentBg); // Add new parameter
+        params.append('transparentBg', transparentBg);
 
         const finalUrl = `${baseUrl}?${params.toString()}`;
         outputUrlElement.textContent = finalUrl;
@@ -55,26 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const debouncedPerformUpdate = debounce(performUpdate, 350);
 
-    function copyUrl() { /* ... (copy function) ... */
-        const urlToCopy = outputUrlElement.textContent;
-        navigator.clipboard.writeText(urlToCopy).then(() => {
-            copyButton.textContent = 'Copied!';
-            setTimeout(() => { copyButton.textContent = 'Copy URL'; }, 1500);
-        }).catch(err => { alert('Failed to copy URL.'); });
-    }
+    function copyUrl() { /* ... (copy function) ... */ }
 
-    // --- Add listener for the new checkbox ---
+    // --- Event Listeners ---
     transparentBgCheckbox.addEventListener('change', () => {
         bgColorInput.disabled = transparentBgCheckbox.checked;
-        debouncedPerformUpdate(); // Trigger update when checkbox changes
+        debouncedPerformUpdate();
     });
-
-    // --- Add existing listeners ---
     form.addEventListener('input', debouncedPerformUpdate);
-    form.addEventListener('change', debouncedPerformUpdate); // 'change' handles the checkbox too
+    form.addEventListener('change', debouncedPerformUpdate);
     copyButton.addEventListener('click', copyUrl);
 
     // --- Initial Call ---
-    bgColorInput.disabled = transparentBgCheckbox.checked; // Set initial disabled state
-    performUpdate();
+    populateFontDropdown(); // Populate the dropdown first!
+    bgColorInput.disabled = transparentBgCheckbox.checked;
+    performUpdate(); // Then run the first update
 });
