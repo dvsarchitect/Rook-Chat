@@ -7,26 +7,33 @@
     --font-family: 'Arial', sans-serif;
     --message-padding: 10px;
     --border-radius: 5px;
-    --hide-avatars: block; /* 'none' to hide, 'block' or 'inline-block' to show */
+    --hide-avatars: block; /* 'none' to hide */
+    --widget-width: 300px; /* New: Default width */
 }
 
 body {
-    background-color: transparent; /* Makes OBS background transparent */
+    background-color: transparent;
     margin: 0;
-    overflow: hidden; /* Prevents scrollbars in OBS unless intended */
+    overflow: hidden; /* CRITICAL: Prevents scrollbars */
     font-family: var(--font-family);
     font-size: var(--font-size);
     color: var(--text-color);
+    width: var(--widget-width); /* Apply width */
 }
 
 #chat-container {
     position: absolute;
-    bottom: 0;
+    /* Change 1: Anchor to the top */
+    top: 0;
     left: 0;
     right: 0;
     display: flex;
+    /* Change 2: Keep column, JS will handle insertion order */
     flex-direction: column;
     padding: 10px;
+    /* Change 3: Add mask for bottom fade */
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 
 .chat-message {
@@ -34,9 +41,31 @@ body {
     margin-bottom: 5px;
     padding: var(--message-padding);
     border-radius: var(--border-radius);
-    animation: slideIn 0.3s ease-out forwards;
-    opacity: 0;
+    /* Change 4: New entry animation (optional: can be different) */
+    animation: slideDown 0.4s ease-out forwards;
+    opacity: 1; /* Start visible, will fade out */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* For fading out */
 }
+
+/* Change 5: New animation - slide from top */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Change 6: New class for fading out */
+.chat-message.fading-out {
+    opacity: 0;
+    transform: translateY(20px); /* Optional: make it slide down/out */
+    margin-bottom: -50px; /* Optional: Helps collapse space quicker */
+}
+
 
 .chat-message img {
     width: 24px;
@@ -51,16 +80,4 @@ body {
     font-weight: bold;
     color: var(--username-color);
     margin-right: 5px;
-}
-
-/* A simple animation for new messages */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
