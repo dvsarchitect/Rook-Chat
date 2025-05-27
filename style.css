@@ -42,7 +42,6 @@ body {
     border-radius: var(--border-radius);
     animation: slideIn 0.3s ease-out forwards;
     opacity: 1;
-    /* ADD BACK: Transition for smooth fade/collapse */
     transition: opacity 0.5s ease-out, transform 0.5s ease-out, height 0.5s ease-out, padding 0.5s ease-out, margin 0.5s ease-out;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -55,7 +54,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ADD BACK: Fading-out class definition */
 .chat-message.fading-out {
     opacity: 0;
     transform: translateY(-20px);
