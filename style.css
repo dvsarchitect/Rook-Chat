@@ -26,10 +26,13 @@ body {
     right: auto;
     display: flex;
     flex-direction: column;
-    padding: 10px; /* Simplified padding */
+    padding: 10px 10px 5px 10px;
     box-sizing: border-box;
+    /* RE-ADD MASK: Fades top 15% */
+    -webkit-mask-image: linear-gradient(to top, black 85%, transparent 100%);
+    mask-image: linear-gradient(to top, black 85%, transparent 100%);
     max-height: 100vh;
-    overflow: hidden; /* Keep this to prevent scrollbars */
+    overflow: hidden;
 }
 
 .chat-message {
@@ -39,14 +42,29 @@ body {
     border-radius: var(--border-radius);
     animation: slideIn 0.3s ease-out forwards;
     opacity: 1;
+    /* RE-ADD: Transition for smooth fade/collapse */
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out, height 0.5s ease-out, padding 0.5s ease-out, margin 0.5s ease-out;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    overflow: hidden;
+    height: auto;
+    overflow: hidden; /* Hide content during collapse */
 }
 
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* RE-ADD: Fading-out class definition */
+.chat-message.fading-out {
+    opacity: 0;
+    transform: translateY(-20px); /* Move up as it fades */
+    height: 0 !important; /* Force height to 0 */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important; /* Collapse margin */
+    border: none !important;
+    min-height: 0;
 }
 
 .chat-message .username {
