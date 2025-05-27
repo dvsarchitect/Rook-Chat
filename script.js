@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let maxMessages = 15;
-    const fadeOutDuration = 500; // Use 500ms for the fade
+    const fadeOutDuration = 500;
     let hiddenUsernames = [];
 
     function applyUrlParameters() {
@@ -22,10 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const width = params.get('width');
         const max = params.get('maxMessages');
         const usersToHide = params.get('hideUsers');
+        const transparentBg = params.get('transparentBg'); // Get new parameter
 
-        if (bgColor) root.style.setProperty('--background-color', `#${bgColor}`);
+        // Apply colors - Handle transparency first
+        if (transparentBg === 'true') {
+            root.style.setProperty('--background-color', 'transparent');
+        } else if (bgColor) {
+            root.style.setProperty('--background-color', `#${bgColor}`);
+        }
+
         if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
         if (userColor) root.style.setProperty('--username-color', `#${userColor}`);
+
+        // Apply other settings
         if (fontSize) root.style.setProperty('--font-size', `${fontSize}px`);
         if (fontFamily) root.style.setProperty('--font-family', fontFamily);
         if (hideAvatars === 'true') {
@@ -48,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Re-implement Fading Removal Function ---
     function removeOldMessages() {
         const messages = Array.from(chatContainer.children);
         const visibleMessages = messages.filter(msg => !msg.classList.contains('fading-out'));
@@ -58,8 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (toRemoveCount > 0) {
             const messagesToFade = visibleMessages.slice(0, toRemoveCount);
             messagesToFade.forEach(message => {
-                message.classList.add('fading-out'); // Add class to trigger CSS transition
-                // Set timeout to remove from DOM *after* transition finishes
+                message.classList.add('fading-out');
                 setTimeout(() => {
                     if (message && message.parentNode === chatContainer) {
                         chatContainer.removeChild(message);
@@ -82,20 +89,21 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="message-text">${message}</span>
         `;
         chatContainer.appendChild(messageElement);
-        removeOldMessages(); // Call fading version
+        removeOldMessages();
         setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
     }
 
     applyUrlParameters();
 
-    // Mock Chat (still running, but won't log like crazy)
-    let demoCounter = 0;
+    // Mock Chat
+    // REMOVED: demoCounter variable
     const demoUsers = ['StreamGazer', 'PixelPilot', 'bot_name', 'CodeWizard', 'GamerGeek', 'username1'];
     const demoMessages = ['Hello!', 'This is awesome!', 'How do I change the color?', 'Pog!', 'LUL'];
     setInterval(() => {
         const user = demoUsers[Math.floor(Math.random() * demoUsers.length)];
         const msg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
-        addChatMessage(user, `${msg} (${demoCounter++})`);
+        // CHANGE: Removed the counter from the message
+        addChatMessage(user, msg);
     }, 2500);
 
-}); // End of DOMContentLoaded
+});
