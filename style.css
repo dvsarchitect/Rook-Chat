@@ -8,7 +8,7 @@
     --message-padding: 10px;
     --border-radius: 5px;
     --hide-avatars: block; /* 'none' to hide */
-    --widget-width: 300px; /* New: Default width */
+    --widget-width: 300px; /* Default width */
 }
 
 body {
@@ -23,17 +23,20 @@ body {
 
 #chat-container {
     position: absolute;
-    /* Change 1: Anchor to the top */
-    top: 0;
+    /* Change 1: Anchor back to the BOTTOM */
+    bottom: 0;
     left: 0;
     right: 0;
     display: flex;
     /* Change 2: Keep column, JS will handle insertion order */
     flex-direction: column;
     padding: 10px;
-    /* Change 3: Add mask for bottom fade */
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    /* Change 3: Flip mask to fade the TOP */
+    -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
+    mask-image: linear-gradient(to top, black 70%, transparent 100%);
+    /* Add max-height and allow scroll for internal management */
+    max-height: 100vh; /* Ensure it doesn't exceed viewport height */
+    overflow: hidden; /* Hide internal scroll, we manage with JS/CSS */
 }
 
 .chat-message {
@@ -41,17 +44,17 @@ body {
     margin-bottom: 5px;
     padding: var(--message-padding);
     border-radius: var(--border-radius);
-    /* Change 4: New entry animation (optional: can be different) */
-    animation: slideDown 0.4s ease-out forwards;
-    opacity: 1; /* Start visible, will fade out */
+    /* Change 4: Revert to slideIn from bottom */
+    animation: slideIn 0.3s ease-out forwards;
+    opacity: 1; /* Start visible */
     transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* For fading out */
 }
 
-/* Change 5: New animation - slide from top */
-@keyframes slideDown {
+/* Change 5: Revert animation - slide from bottom */
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -59,11 +62,11 @@ body {
     }
 }
 
-/* Change 6: New class for fading out */
+/* Change 6: Fading out class - fade and move UP */
 .chat-message.fading-out {
     opacity: 0;
-    transform: translateY(20px); /* Optional: make it slide down/out */
-    margin-bottom: -50px; /* Optional: Helps collapse space quicker */
+    transform: translateY(-20px); /* Move up as it fades */
+    margin-bottom: -50px; /* Helps collapse space quicker */
 }
 
 
