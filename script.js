@@ -15,8 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const fontSize = params.get('fontSize');
         const fontFamily = params.get('fontFamily');
         const hideAvatars = params.get('hideAvatars');
-        const width = params.get('width'); // New
-        const max = params.get('maxMessages'); // New
+        const width = params.get('width');
+        const max = params.get('maxMessages');
 
         if (bgColor) root.style.setProperty('--background-color', `#${bgColor}`);
         if (textColor) root.style.setProperty('--text-color', `#${textColor}`);
@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             root.style.setProperty('--hide-avatars', 'inline-block');
         }
-        // Apply new settings
         if (width) root.style.setProperty('--widget-width', `${width}px`);
         if (max) maxMessages = parseInt(max, 10);
 
@@ -46,45 +45,48 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="message-text">${message}</span>
         `;
 
-        // Change 1: Insert at the TOP
-        chatContainer.insertBefore(messageElement, chatContainer.firstChild);
+        // Change 1: Insert at the BOTTOM
+        chatContainer.appendChild(messageElement);
 
-        // Change 2: Handle Message Limit and Fading
+        // Change 2: Handle Message Limit - Target FIRST child (oldest)
         while (chatContainer.children.length > maxMessages) {
-            const oldestMessage = chatContainer.lastChild; // Oldest is now at the bottom
+            const oldestMessage = chatContainer.firstChild; // Oldest is now at the TOP
             if (oldestMessage && !oldestMessage.classList.contains('fading-out')) {
                 oldestMessage.classList.add('fading-out');
                 // Remove after the fade animation completes
                 setTimeout(() => {
-                    // Check if the element still exists before removing
                     if (oldestMessage && oldestMessage.parentNode) {
                        oldestMessage.parentNode.removeChild(oldestMessage);
                     }
                 }, fadeOutDuration);
             } else if (oldestMessage) {
-                // If it's already fading, just remove it (safety net)
-                if (oldestMessage.parentNode) {
+                 if (oldestMessage.parentNode) {
                     oldestMessage.parentNode.removeChild(oldestMessage);
                 }
             } else {
-                break; // Should not happen, but break if no last child
+                break;
             }
         }
+
+        // Change 3: Ensure it auto-scrolls to the bottom
+        // We use a small timeout to allow the element to render first
+        setTimeout(() => {
+             chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 50);
+
     }
 
     // --- 3. Run Everything ---
     applyUrlParameters();
 
-    // --- 4. Mock Chat (Updated) ---
-    // REMOVE THIS SECTION WHEN YOU INTEGRATE A REAL CHAT API
+    // --- 4. Mock Chat (No change needed, but demonstrates new flow) ---
     let demoCounter = 0;
-    const demoUsers = ['RookMaster', 'CastleGuard', 'PawnPower', 'KnightMove'];
-    const demoMessages = ['Checkmate!', 'Nice move!', 'Watch out for that flank!', 'En passant!', 'Good game!'];
+    const demoUsers = ['StreamGazer', 'PixelPilot', 'CodeWizard', 'GamerGeek'];
+    const demoMessages = ['Hello!', 'This is awesome!', 'How do I change the color?', 'Pog!', 'LUL'];
 
     setInterval(() => {
         const user = demoUsers[Math.floor(Math.random() * demoUsers.length)];
         const msg = demoMessages[Math.floor(Math.random() * demoMessages.length)];
         addChatMessage(user, `${msg} (${demoCounter++})`);
     }, 2000); // Add a new message every 2 seconds
-    // --- END MOCK CHAT SECTION ---
 });
